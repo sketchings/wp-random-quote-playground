@@ -35,15 +35,15 @@ function sketchings_quotes ( $category = null )
         "Sleep is the best meditation. - Dalai Lama",
     ];
 
-    if ( in_array(strtolower(trim($category)), array('motivation', 'motivate')) ) {
+    if ( in_array(strtolower(trim($category)), array('motivation', 'motivated', 'motivate')) ) {
         return $motivation;
     }
 
-    if ( in_array(strtolower(trim($category)), array('encouragement', 'encourage', 'encouraging')) ) {
+    if ( in_array(strtolower(trim($category)), array('encouragement', 'encouraged', 'encourage', 'encouraging')) ) {
         return $encouragement;
     }
 
-    return array_combine($motivation, $encouragement);
+    return array_merge($motivation, $encouragement);
 }
 
 /*
@@ -51,15 +51,13 @@ function sketchings_quotes ( $category = null )
  */
 function sketchings_random_quote ( $category = null )
 {
-    if (empty($category)) {
-        $hour = date('H');
-        if ($hour > 4 && $hour < 17) {
-            $quotes = sketchings_quotes('motivation');
-        } else {
-            $quotes = sketchings_quotes('encouragement');
-        }
+    $hour = date('H');
+    if (!empty($category)) {
+        $quotes = sketchings_quotes($category);
+    } elseif ($hour > 4 && $hour < 17) {
+        $quotes = sketchings_quotes('motivation');
     } else {
-        $quotes = sketchings_quotes( $category );
+        $quotes = sketchings_quotes('encouragement');
     }
     $index = array_rand($quotes);
     return $quotes[$index];
@@ -73,14 +71,6 @@ function sketchings_quote () {
     echo '<blockquote>' . sketchings_random_quote() . '</blockquote>';
 }
 add_action( 'loop_end', 'sketchings_quote' );
-
-/*
- * Add shortcode to add quote to widget or post
- */
-function sketchings_random_quote_shortcode( $atts ) {
-    return sketchings_random_quote( $atts['category'] );
-}
-add_shortcode( 'random-quote', 'sketchings_random_quote_shortcode' );
 
 
 /*
@@ -96,7 +86,7 @@ add_action( 'wp_head', 'sketchings_random_quote_styles' );
 /*
  * Show tool tip for certain words
  */
-function sketchings_replace_content($content) {
+function sketchings_tooltip($content) {
     $search = array(
             ' motivation',
             ' motivate',
@@ -115,4 +105,12 @@ function sketchings_replace_content($content) {
     }
     return $content;
 }
-add_filter ('the_content', 'sketchings_replace_content');
+add_filter ('the_content', 'sketchings_tooltip');
+
+/*
+ * Add shortcode to add quote to widget or post
+ */
+function sketchings_random_quote_shortcode( $atts ) {
+    return sketchings_random_quote( $atts['category'] );
+}
+add_shortcode( 'random-quote', 'sketchings_random_quote_shortcode' );
